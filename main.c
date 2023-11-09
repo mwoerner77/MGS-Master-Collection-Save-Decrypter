@@ -63,6 +63,27 @@ int CalculateCRC32(const u8* data, int size)
     return ~crc;
 }
 
+u32 CalculateCRC32Switch(const u8* data, int size)
+{
+    u32 crc = -1;
+
+    while (size--)
+    {
+        crc = crc ^ *data++;
+        for (int j = 0; j < 8; j++)
+        {
+            int num = crc & 1;
+            crc = crc >> 1;
+            if (num != 0)
+            {
+                crc ^= CRC_POLY;
+            }
+        }
+    }
+
+    return crc;
+}
+
 void crc32_fill(uint32_t *table, uint32_t poly)
 {
     uint8_t index=0, z;
@@ -138,8 +159,6 @@ void EncodeBase64(u8* data, const char* chars)
     }
 
     data[0] = 68;
-//    for (i = 0, j = 0; i < 28; i++, j += (i % 4) ? 0 : 28)
-//        data[i + 1] = (u8)chars[(tmpArray[i] + j +  7 * (i % 4)) & 63];
 
     for (i = 0, j = 0; i < 28; j += 28, i += 4)
     {
@@ -258,11 +277,31 @@ void mgs2_mc_decrypt_data(u8* data, u32 size)
 	return;
 }
 
-u32 mgs2_mc_encrypt_data(u8* data, u32 size)
+u32 mgs2_mc_encrypt_data_pc(u8* data, u32 size)
+{
+	printf("[*] MGS2 MC Total Encrypted Size Is 0x%X (%d bytes)\n", size, size);
+    u32 crc = ES32(CalculateCRC32(data + 4, 0x1598) ^ CalculateCRC32(data + 0x15aa, 0x1c00));
+    u32 endian_swapped_crc = ((crc>>24)&0xff) | ((crc<<8)&0xff0000) | ((crc>>8)&0xff00) | ((crc<<24)&0xff000000); 
+    memcpy(data + 0x15a6L, &endian_swapped_crc, sizeof(u32));
+
+    // Encrypt Layer 2
+    Encrypt("", data + 4, 0x1598);
+    Encrypt("", data + 0x15aa, 0x1c00);
+    Encrypt("", data + 0x31aa, 0x4100);
+
+    crc = crc32(data + 4, 0x72a6);
+    Encrypt(MGS2_KEY, data + 4, 0x72a6);
+
+    printf("[*] New Checksum: %08X\n", crc);
+	printf("[*] Encrypted File Successfully!\n\n");
+	return (ES32(crc));
+}
+
+u32 mgs2_mc_encrypt_data_switch(u8* data, u32 size)
 {
 	printf("[*] MGS2 MC Total Encrypted Size Is 0x%X (%d bytes)\n", size, size);
 
-    u32 crc = ES32(CalculateCRC32(data + 4, 0x1598) ^ CalculateCRC32(data + 0x15aa, 0x1c00));
+    u32 crc = ES32(CalculateCRC32Switch(data + 4, 0x1598) ^ CalculateCRC32Switch(data + 0x15aa, 0x1c00));    
     u32 endian_swapped_crc = ((crc>>24)&0xff) | ((crc<<8)&0xff0000) | ((crc>>8)&0xff00) | ((crc<<24)&0xff000000); 
     memcpy(data + 0x15a6L, &endian_swapped_crc, sizeof(u32));
 
@@ -332,7 +371,8 @@ void print_usage(const char* argv0)
     printf(" -2            MGS2 File\n");
 	printf(" -3            MGS3 File\n\n");
     printf(" -h            HD Collection File\n");
-	printf(" -m            Master Collection File\n\n");
+	printf(" -p            Master Collection File (PC)\n\n");
+    printf(" -s            Master Collection File (Switch)\n\n");
 	return;
 }
 
@@ -341,9 +381,9 @@ int main(int argc, char **argv)
 	size_t len;
 	u8* data;
 	char *opt1, *opt2, *opt3, *bak, type;
-    int is_decrypt = 0, is_encrypt = 0, is_mgs2 = 0, is_mgs3 = 0, is_hd = 0, is_mc = 0;
+    int is_decrypt = 0, is_encrypt = 0, is_mgs2 = 0, is_mgs3 = 0, is_hd = 0, is_pc = 0, is_switch = 0;
 
-	printf("\nMetal Gear Solid HD save decrypter 0.1.0 - (c) 2021 by Bucanero\n\n");
+	printf("\nMGS HD and Master Collection Save Decryptor 1.0.0 - (c) 2023 by LiquidPlazmid\n\n");
 	
 	if (--argc < 4)
 	{
@@ -352,21 +392,21 @@ int main(int argc, char **argv)
 	}
 	
 	opt1 = argv[1];
-	if (*opt1++ != '-' || (*opt1 != 'd' && *opt1 != 'e' && *opt1 != '2' && *opt1 != '3' && *opt1 != 'h' && *opt1 != 'm'))
+	if (*opt1++ != '-' || (*opt1 != 'd' && *opt1 != 'e' && *opt1 != '2' && *opt1 != '3' && *opt1 != 'h' && *opt1 != 'p' && *opt1 != 's'))
 	{
 		print_usage(argv[0]);
 		return -1;
 	}
 
     opt2 = argv[2];
-	if (*opt2++ != '-' || (*opt2 != 'd' && *opt2 != 'e' && *opt2 != '2' && *opt2 != '3' && *opt2 != 'h' && *opt2 != 'm'))
+	if (*opt2++ != '-' || (*opt2 != 'd' && *opt2 != 'e' && *opt2 != '2' && *opt2 != '3' && *opt2 != 'h' && *opt2 != 'p' && *opt2 != 's'))
 	{
 		print_usage(argv[0]);
 		return -1;
 	}
 
     opt3 = argv[3];
-	if (*opt3++ != '-' || (*opt3 != 'd' && *opt3 != 'e' && *opt3 != '2' && *opt3 != '3' && *opt3 != 'h' && *opt3 != 'm'))
+	if (*opt3++ != '-' || (*opt3 != 'd' && *opt3 != 'e' && *opt3 != '2' && *opt3 != '3' && *opt3 != 'h' && *opt3 != 'p' && *opt3 != 's'))
 	{
 		print_usage(argv[0]);
 		return -1;
@@ -388,8 +428,11 @@ int main(int argc, char **argv)
         case 'h':
             is_hd = 1;
             break;
-        case 'm':
-            is_mc = 1;
+        case 'p':
+            is_pc = 1;
+            break;
+        case 's':
+            is_switch = 1;
             break;
         default:
             break;
@@ -411,8 +454,11 @@ int main(int argc, char **argv)
         case 'h':
             is_hd = 1;
             break;
-        case 'm':
-            is_mc = 1;
+        case 'p':
+            is_pc = 1;
+            break;
+        case 's':
+            is_switch = 1;
             break;
         default:
             break;
@@ -434,8 +480,11 @@ int main(int argc, char **argv)
         case 'h':
             is_hd = 1;
             break;
-        case 'm':
-            is_mc = 1;
+        case 'p':
+            is_pc = 1;
+            break;
+        case 's':
+            is_switch = 1;
             break;
         default:
             break;
@@ -470,7 +519,7 @@ int main(int argc, char **argv)
 		printf("[*] %s File Decoded\n", "MASTER.BIN");
 	}
 
-    else if (is_decrypt && is_mgs2 && is_mc)
+    else if (is_decrypt && is_mgs2 && (is_pc || is_switch))
 	{
 		mgs2_mc_decrypt_data(data, len);
 		write_buffer(argv[4], data, len);
@@ -498,9 +547,14 @@ int main(int argc, char **argv)
 		printf("[*] %s File Encoded\n", "MASTER.BIN");
 	}
 
-    else if (is_encrypt && is_mgs2 && is_mc)
+    else if (is_encrypt && is_mgs2 && (is_pc || is_switch))
 	{
-		u32 crc = mgs2_mc_encrypt_data(data, len);
+		u32 crc;
+        if (is_pc)
+            crc = mgs2_mc_encrypt_data_pc(data, len);
+        else
+            crc = mgs2_mc_encrypt_data_switch(data, len);
+
 		write_buffer(argv[4], data, len);
 	    free(data);
 
@@ -540,7 +594,7 @@ int main(int argc, char **argv)
 		printf("[*] %s File Decoded\n", "MASTER.BIN");
 	}
 
-    else if (is_decrypt && is_mgs3 && is_mc)
+    else if (is_decrypt && is_mgs3 && (is_pc || is_switch))
 	{
 		mgs3_mc_decrypt_data(data, len);
 		write_buffer(argv[4], data, len);
@@ -570,7 +624,7 @@ int main(int argc, char **argv)
 		printf("[*] %s File Encoded\n", "MASTER.BIN");
 	}
 
-    else if (is_encrypt && is_mgs3 && is_mc)
+    else if (is_encrypt && is_mgs3 && (is_pc || is_switch))
 	{
 		u32 crc = mgs3_mc_encrypt_data(data, len);
 		write_buffer(argv[4], data, len);
