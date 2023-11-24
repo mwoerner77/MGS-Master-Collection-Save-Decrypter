@@ -31,6 +31,50 @@ This tool, nor the author is not responsible for any lost or damaged saves. Plea
 
 When using Steam, ensure that the game is running when you modify its save folder otherwise Steam Cloud may re-add any deleted files upon launching the game and cause issues due to multiple saves being present in the same slot. If not running the game, be sure to delete any files Steam Cloud re-adds when launching the game before attempting to load a save.
 
+## Gameplay Stats Editing
+
+These values are confirmed to be working for the Master Collection, but given the addresses found should also work for the HD Collection.
+Making changes to these values will NOT change how the save appears on the file select screen until you save again over that slot (i.e. time will not change until you save again).
+Note: any value you add to these files for the Master Collection should be in little endian format. For example if you want to change kills to 300 (0x12C) you would write this value into the save file as 2C 01
+
+### Metal Gear Solid 2
+
+```
+ADDRESS     SIZE (BYTES)    STAT
+0x136       2               Continues
+0x13A       2               Saves
+0x13C       4               Time Played (In frames, 60 x seconds played)
+0x144       2               Shots Fired
+0x146       2               Alerts
+0x148       2               Kills
+0x14A       2               Damage Taken
+0x1594      2               Rations Used
+0x1598      2               Times Seen by Enemy (Not Alerts)
+0x159A      2               Special Items/Radar Usage (0x0000 = Radar Off, No Special Items Used, 0x201X = Radar Off, Special Items Used, 0x0020 = Radar On, No Special Items Used, 0x203X = Radar On, Special Items Used)*
+0x14        1               Difficulty (not sure if this actually changes things like enemy health or damage in the current playthrough, this was tested on a save about to start new game plus and it does effect damage values in new game plus and end game titles on the current playthrough) (0x0A = Very Easy, 0x14 = Easy, 0x1E = Normal, 0x28 = Hard, 0x32 = Extreme, 0x3C = European Extreme)
+
+* X refers to the special items used. Add the values of the special items used to get X. (Stealth Camo = 0x1, Infinity Bandana/Wig = 0x2, Wig A (02 Wig) = 0x4, Wig B (Grip Wig) = 0x8). All items used adds up to 0xF. Just Infinite Ammo and Stealth Camo is 0x7.
+```
+
+### Metal Gear Solid 3
+
+```
+ADDRESS     SIZE (BYTES)    STAT
+0x34        2               Continues
+0x36        2               Saves Made
+0x38        2               Alert Phases
+0x3A        2               Humans Killed
+0x3D        1               Special Items (0x00 = Not Used, 0x01 = Stealth Camo, 0x02 = Inf Face Paint, 0x04 = EZ Gun, 0x05 = Camo and EZ Gun, 0x06 = Inf. Face Paint and EZ Gun, 0x03 Stealth Camo and Inf. Face Paint, 0x07 All 3 Items)
+0x3F        1               Plants & Animals Captured (No clue if this impacts the markhor achievement or unlocks the EZ Gun if changed)
+0x40        2               Times Seriously Injured
+0x42        2               Damage Taken (Between lifebars, once this value reaches a certain point it resets to 0 and the lifebar count increases)
+0x44        2               Damage Taken (Lifebars) (This is what shows up on the end screen)
+0x46        2               Meals Eaten 
+0x4C        4               Time Played (In frames, 60 x seconds played)
+0x5A8       2               LF Med used
+0x06        1               Difficulty (not sure if this actually changes things like enemy health or damage in the current playthrough, this was tested on a save about to start new game plus and it does effect damage values in new game plus and end game titles on the current playthrough) (0x0A = Very Easy, 0x14 = Easy, 0x1E = Normal, 0x28 = Hard, 0x32 = Extreme, 0x3C = European Extreme)
+```
+
 ## Convert Operation Instructions
 
 The behavior of the "convert file" (-c) operation differs based on the game selected. However, one common feature held between all conversions is that the selected platform is the platform the save will be converted to if possible.
