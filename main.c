@@ -367,7 +367,7 @@ void mgs3_mc_decrypt_data(u8* data, u32 size)
 
 u32 mgs3_mc_encrypt_data(u8* data, u32 size)
 {
-	printf("[*] MG2 MC Total Encrypted Size Is 0x%X (%d bytes)\n", size, size);
+	printf("[*] MGS3 MC Total Encrypted Size Is 0x%X (%d bytes)\n", size, size);
 
     u32 crc = crc32(data, 0x4A7c);
     Encrypt(MGS3_KEY, data, 0x4A7c);
