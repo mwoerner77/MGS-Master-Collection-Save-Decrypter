@@ -19,7 +19,7 @@ GAMES          Explanation:
  -3            Metal Gear Solid 3: Snake Eater Save File
 
 PLATFORMS      Explanation:
- -s            Save is from the Master Collection for PC (Steam)
+ -p            Save is from the Master Collection for PC (Steam)
  -s            Save is from the Master Collection for Switch
  -h            Save is from the HD Collection for Xbox 360 and PS3
 
