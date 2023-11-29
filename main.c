@@ -6,6 +6,7 @@
 *
 */
 
+#include <libgen.h>
 #include "asprintf.h"
 #include "iofile.c"
 
@@ -655,7 +656,7 @@ int main(int argc, char **argv)
 		write_buffer(argv[4], data, len);
 	    free(data);
 
-        u8* filename = argv[4];
+        u8* filename = basename(argv[4]);
         size_t filename_length = strlen(filename);
         printf("Old filename: %s, Length: %zu\n", filename, filename_length);
 	
@@ -774,7 +775,7 @@ int main(int argc, char **argv)
 		write_buffer(argv[4], data, len);
 	    free(data);
 
-        u8* filename = argv[4];
+        u8* filename = basename(argv[4]);
         size_t filename_length = strlen(filename);
         printf("Old filename: %s, Length: %zu\n", filename, filename_length);
 
@@ -803,7 +804,7 @@ int main(int argc, char **argv)
 		write_buffer(argv[4], data, len);
 	    free(data);
 	
-		u8* filename = argv[4];
+		u8* filename = basename(argv[4]);
         size_t filename_length = strlen(filename);
         printf("Old filename: %s, Length: %zu\n", filename, filename_length);
 
@@ -831,7 +832,7 @@ int main(int argc, char **argv)
 		write_buffer(argv[4], data, len);
 	    free(data);
 	
-		u8* filename = argv[4];
+		u8* filename = basename(argv[4]);
         size_t filename_length = strlen(filename);
         printf("Old filename: %s, Length: %zu\n", filename, filename_length);
 
@@ -917,7 +918,7 @@ int main(int argc, char **argv)
 		write_buffer(argv[4], data, len);
 	    free(data);
 
-        u8* filename = argv[4];
+        u8* filename = basename(argv[4]);
         size_t filename_length = strlen(filename);
         printf("Old filename: %s, Length: %zu\n", filename, filename_length);
 	
