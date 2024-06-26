@@ -4,6 +4,18 @@ A tool to decrypt Metal Gear, Metal Gear 2: Solid Snake, Metal Gear Solid 2: Son
 
 Note: this tool also updates the custom integrity checksums.
 
+## How to Use
+
+This tool requires a command prompt that can run exe files such as the default windows command prompt.
+
+1. In a command prompt window, navigate to the directory containing the .exe file. 
+2. It is recommended to make a backup of any save file before trying to run it through this program in case something goes wrong.
+3. Use the below instructions to run the program. The below instructions feature the command you need to run along with multiple "fill in the blank" options. It is important to note that it is recommended to transfer the individual file you with to decrypt or encrypt to the same directory as the exe. 
+4. Make any edits you'd like to the decrypted file using any hex editor. Some useful addresses for each game are below. 
+5. Repeat step 3 to re-encrypt the file.
+6. Follow the output of the program in the console. Depending on any edits to the file it may be required to rename the save file before adding it back to steam/switch.
+
+
 ```
 USAGE: ./mgs-mc-hd-decrypter [operation] [game] [platform] filename
 
