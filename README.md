@@ -2,7 +2,7 @@
 
 A tool to decrypt Metal Gear, Metal Gear 2: Solid Snake, Metal Gear Solid 2: Sons of Liberty, and Metal Gear Solid 3: Snake Eater Master Collection (Steam and Switch) and HD Collection (Xbox 360 and PS3) save-games
 
-Note: this tool also updates the custom integrity checksums.
+Note: this tool also updates the custom integrity checksums. 
 
 ## How to Use
 
